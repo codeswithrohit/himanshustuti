@@ -20,3 +20,4 @@
 
 All wedding copy, names, dates, and schedule are editable in `app/weddingData.js` and `app/page.js`.
 # himanshustuti
+# himanshustuti
