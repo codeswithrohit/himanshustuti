@@ -18,16 +18,17 @@ import {
   VolumeX,
   X,
 } from "lucide-react";
-
+import { firebase } from "../Firebase/config";
+import { doc, getDoc } from "firebase/firestore";
 /* =====================================================
    WEDDING CONFIGURATION
 ===================================================== */
 
-const guest = {
-  name: "Rohit Kumar",
-  location: "Sasaram, Bihar",
+const defaultGuest = {
+  name: "Our Special Guest",
+  location: "Your Location",
 };
-
+const db = firebase.firestore()
 const wedding = {
   groom: "हिमांशु",
   bride: "स्तुति",
@@ -97,7 +98,7 @@ const familyNames = [
   "श्रीमती गीता वर्मा – श्री अनिल वर्मा",
   "श्रीमती रेखा वर्मा – श्री अजय वर्मा",
   "हरित वर्मा, करिश्मा वर्मा (ओम)",
-  "आर्यन वर्मा, नवनीत वर्मा, कन्या वर्मा",
+  "आर्यन वर्मा, नंदनी वर्मा, नव्या वर्मा",
   "एवं समस्त वर्मा परिवार व मित्रगण",
 ];
 
@@ -105,9 +106,16 @@ const navItems = [
   ["निमंत्रण", "#invitation"],
   ["कार्यक्रम", "#events"],
   ["विवाह स्थल", "#venue"],
+  ["दूल्हा निवास", "#groom-home"],
   ["परिवार", "#family"],
 ];
-
+const groomHome = {
+  title: "Dulha Home Location",
+  subtitle: "हिमांशु निवास",
+  address: "Haridwar, Uttarakhand",
+  mapUrl:
+    "https://maps.app.goo.gl/voEV3fjiHzdrj56k7?g_st=aw",
+};
 /* =====================================================
    REUSABLE COMPONENTS
 ===================================================== */
@@ -224,44 +232,75 @@ function SectionHeading({ eyebrow, title, subtitle }) {
 }
 
 /* Personalized guest card */
-function GuestCard({ compact = false }) {
+
+function GuestCard({ guest, compact = false }) {
   return (
     <div
-      className={`relative mx-auto w-full overflow-hidden rounded-2xl border border-[#d8b46b]/60 bg-gradient-to-br from-[#fffdf8] via-[#fff8e9] to-[#f7ecd8] text-center shadow-[0_15px_50px_rgba(30,8,16,0.15)] ${
-        compact ? "max-w-sm px-5 py-5" : "max-w-lg px-6 py-8 sm:px-10"
+      className={`relative mx-auto w-full overflow-hidden rounded-2xl border border-[#d8b46b]/40 bg-gradient-to-br from-[#260b16] via-[#310e1c] to-[#260b16] text-center shadow-[0_15px_50px_rgba(30,8,16,0.25)] ${
+        compact
+          ? "max-w-sm px-4 py-4"
+          : "max-w-lg px-6 py-8 sm:px-10"
       }`}
     >
-      <div className="pointer-events-none absolute inset-2 rounded-xl border border-[#c49a50]/25" />
+      {/* Inner decorative border */}
+      <div className="pointer-events-none absolute inset-2 rounded-xl border border-[#d8b46b]/20" />
 
       <div className="relative">
-        <div className="mb-2 text-[10px] font-semibold tracking-[0.3em] text-[#a77b3e]">
-          {compact ? "A SPECIAL INVITATION FOR" : "YOU ARE CORDIALLY INVITED"}
-        </div>
-
-        <div className="mx-auto my-3 flex h-9 w-9 items-center justify-center rounded-full border border-[#c49a50]/50 text-[#a77b3e]">
-          <Heart size={16} fill="currentColor" />
-        </div>
-
-        <p className="font-serif text-2xl text-[#67283b] sm:text-3xl">
-          {guest.name}
+        {/* Invitation heading */}
+        <p className="text-[9px] font-semibold tracking-[0.3em] text-[#d8b46b] sm:text-[10px]">
+          {compact
+            ? "A SPECIAL INVITATION FOR"
+            : "YOU ARE CORDIALLY INVITED"}
         </p>
 
-        <div className="mt-3 flex items-center justify-center gap-2 text-xs text-[#80665a] sm:text-sm">
-          <MapPin size={15} className="text-[#b58a4b]" />
+        {/* Guest name */}
+        <h2
+          className={`mt-2 font-serif italic tracking-wide text-[#fff1d7] ${
+            compact ? "text-2xl sm:text-3xl" : "text-3xl sm:text-4xl"
+          }`}
+        >
+          {guest.name}
+        </h2>
+
+        {/* Gold decorative divider */}
+        <div className="mt-2 flex items-center justify-center gap-2">
+          <span className="h-px w-7 bg-[#d8b46b]/50" />
+          <Heart
+            size={13}
+            className="text-[#e5bd72]"
+            fill="currentColor"
+          />
+          <span className="h-px w-7 bg-[#d8b46b]/50" />
+        </div>
+
+        {/* Location */}
+        <div className="mt-3 flex items-center justify-center gap-2 text-[10px] tracking-wide text-[#e9c77e]/90 sm:text-xs">
+          <MapPin size={13} className="shrink-0 text-[#d8b46b]" />
           <span>{guest.location}</span>
         </div>
 
+        {/* Family invitation message */}
         {!compact && (
-          <p className="mt-5 text-xs leading-6 text-[#8c7165]">
+          <p className="mt-5 text-[11px] leading-6 tracking-wide text-[#fff1d7]/75 sm:text-xs">
             आपकी स्नेहिल उपस्थिति एवं शुभाशीर्वाद की प्रतीक्षा में
             <br />
-            हिमांशु ♥ स्तुति एवं समस्त वर्मा परिवार
+            <span className="text-[#e5bd72]">
+              हिमांशु ♥ स्तुति एवं समस्त वर्मा परिवार
+            </span>
+          </p>
+        )}
+
+        {/* Compact footer */}
+        {compact && (
+          <p className="mt-2 text-[9px] tracking-[0.12em] text-[#e9c77e]/80">
+            YOUR PRESENCE WILL MAKE OUR DAY SPECIAL
           </p>
         )}
       </div>
     </div>
   );
 }
+
 
 function GaneshaWelcome() {
   return (
@@ -386,6 +425,8 @@ function Countdown() {
 ===================================================== */
 
 export default function WeddingPage() {
+  const [guest, setGuest] = useState(defaultGuest);
+  const [guestLoading, setGuestLoading] = useState(true);
   const [opened, setOpened] = useState(false);
   const [leaving, setLeaving] = useState(false);
   const [playing, setPlaying] = useState(false);
@@ -393,6 +434,50 @@ export default function WeddingPage() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   const audioRef = useRef(null);
+
+  // Load personalized guest details from the Firebase invitation ID.
+  useEffect(() => {
+    let active = true;
+
+    const loadGuestInvitation = async () => {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const invitationId = params.get("invite");
+
+        if (!invitationId) {
+          if (active) setGuest(defaultGuest);
+          return;
+        }
+
+        const invitationRef = doc(db, "weddingInvitations", invitationId);
+        const invitationSnap = await getDoc(invitationRef);
+
+        if (active && invitationSnap.exists()) {
+          const data = invitationSnap.data();
+          setGuest({
+            name: data.name?.trim() || defaultGuest.name,
+            location: data.location?.trim() || defaultGuest.location,
+          });
+        } else if (active) {
+          setGuest({
+            name: "Invitation Guest",
+            location: defaultGuest.location,
+          });
+        }
+      } catch (error) {
+        console.error("Unable to load wedding invitation:", error);
+        if (active) setGuest(defaultGuest);
+      } finally {
+        if (active) setGuestLoading(false);
+      }
+    };
+
+    loadGuestInvitation();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -455,7 +540,10 @@ export default function WeddingPage() {
   const closeMenu = () => setMenuOpen(false);
 
   return (
-    <main className="min-h-screen overflow-hidden bg-[#fffaf1] font-sans text-[#4a1927] selection:bg-[#d8b46b] selection:text-[#35101c]">
+    <main
+      aria-busy={guestLoading}
+      className="min-h-screen overflow-hidden bg-[#fffaf1] font-sans text-[#4a1927] selection:bg-[#d8b46b] selection:text-[#35101c]"
+    >
 
       {/* SCROLL PROGRESS */}
       <div className="fixed left-0 top-0 z-[100] h-[3px] w-full bg-[#d8b46b]/20">
@@ -532,25 +620,8 @@ export default function WeddingPage() {
       </div>
 
 {/* Personalized Guest Invitation */}
-<div className="mx-auto mt-5 max-w-sm rounded-xl border border-[#d8b46b]/25 bg-[#260b16]/35 px-4 py-3 shadow-inner">
-
-  <p className="text-[9px] font-semibold tracking-[0.3em] text-[#d8b46b] sm:text-[10px]">
-    A SPECIAL INVITATION FOR
-  </p>
-
-  <h2 className="mt-2 font-serif text-2xl italic tracking-wide text-[#fff1d7] sm:text-3xl">
-    Rohit Kumar
-  </h2>
-
-  <div className="mt-2 flex items-center justify-center gap-2">
-    <span className="h-px w-7 bg-[#d8b46b]/50" />
-    <span className="text-[10px] text-[#e5bd72]">✦</span>
-    <span className="h-px w-7 bg-[#d8b46b]/50" />
-  </div>
-
-  <p className="mt-1 text-[9px] tracking-[0.12em] text-[#e9c77e]/80">
-    YOUR PRESENCE WILL MAKE OUR DAY SPECIAL
-  </p>
+<div className="mx-auto mt-5 max-w-sm">
+  <GuestCard guest={guest} compact />
 </div>
 
 {/* Divider */}
@@ -634,9 +705,7 @@ export default function WeddingPage() {
       <p className="mt-4 text-[9px] tracking-[0.2em] text-[#d8b46b]/70">
         MADE WITH LOVE & BLESSINGS
       </p>
-      <p className="mt-4 text-[9px] tracking-[0.2em] text-[#d8b46b]/70">
-   TECH RAKSHAK
-      </p>
+   
 
     </div>
   </section>
@@ -737,7 +806,7 @@ export default function WeddingPage() {
               </div>
 
               <div className="mx-auto max-w-sm">
-                <GuestCard compact />
+                <GuestCard guest={guest} compact />
               </div>
 
               <a
@@ -769,7 +838,7 @@ export default function WeddingPage() {
               />
 
               <Reveal className="mb-9">
-                <GuestCard />
+                <GuestCard guest={guest} />
               </Reveal>
 
               <Reveal>
@@ -1079,7 +1148,85 @@ export default function WeddingPage() {
 
             </div>
           </section>
+{/* DULHA HOME LOCATION */}
+<section
+  id="groom-home"
+  className="scroll-mt-20 bg-[#fffaf1] px-5 py-20 sm:py-24"
+>
+  <div className="mx-auto max-w-3xl">
 
+    <SectionHeading
+      eyebrow="GROOM'S RESIDENCE"
+      title="Dulha Home Location"
+      subtitle="दूल्हे के निवास स्थान पर आपका हार्दिक स्वागत है।"
+    />
+
+    <Reveal>
+      <div className="relative overflow-hidden rounded-[26px] border border-[#d8b46b]/60 bg-gradient-to-br from-[#3a101f] via-[#4b1728] to-[#260b16] px-6 py-12 text-center text-[#fff0d6] shadow-[0_25px_65px_rgba(64,20,34,0.18)] sm:rounded-[30px] sm:px-12">
+
+        {/* Decorative Border */}
+        <div className="absolute inset-3 rounded-[20px] border border-[#d8b46b]/25" />
+
+        <div className="relative">
+
+          {/* Location Icon */}
+          <div className="mx-auto flex h-20 w-20 items-center justify-center rounded-full border border-[#d8b46b]/60 bg-[#d8b46b]/10 shadow-[0_0_30px_rgba(216,180,107,0.15)]">
+            <MapPin
+              size={34}
+              className="text-[#e7c783]"
+            />
+          </div>
+
+          <p className="mt-7 text-[10px] font-semibold tracking-[0.3em] text-[#d8b46b]">
+            THE GROOM'S RESIDENCE
+          </p>
+
+          <h3 className="mt-4 font-serif text-3xl text-[#e7c783] sm:text-4xl">
+            {groomHome.subtitle}
+          </h3>
+
+          <p className="mt-3 text-lg text-[#fff0d6]">
+            {wedding.groomFull}
+          </p>
+
+          <div className="mx-auto my-6 flex max-w-sm items-center justify-center gap-3 text-sm leading-7 text-[#f0dfc6]">
+            <MapPin size={17} className="shrink-0 text-[#e7c783]" />
+            {groomHome.address}
+          </div>
+
+          <div className="my-7 flex items-center justify-center gap-2 text-xs text-[#e7c783]">
+            <Heart size={15} fill="currentColor" />
+            <span>WE WELCOME YOU WITH LOVE</span>
+            <Heart size={15} fill="currentColor" />
+          </div>
+
+          {/* Google Maps Direction Button */}
+          <a
+            href={groomHome.mapUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="group inline-flex w-full max-w-xs items-center justify-center gap-3 rounded-full border border-[#e7c783] bg-[#e7c783] px-6 py-4 text-xs font-bold tracking-wider text-[#3a101f] shadow-lg transition-all duration-500 hover:-translate-y-1 hover:bg-transparent hover:text-[#e7c783] sm:w-auto"
+          >
+            <MapPin size={17} />
+
+            GET DIRECTIONS TO DULHA HOME
+
+            <ArrowRight
+              size={16}
+              className="transition-transform group-hover:translate-x-1"
+            />
+          </a>
+
+          <p className="mt-5 text-[10px] tracking-wider text-[#e8d5b9]/70">
+            TAP ABOVE TO OPEN LOCATION IN GOOGLE MAPS
+          </p>
+
+        </div>
+      </div>
+    </Reveal>
+
+  </div>
+</section>
           {/* FAMILY */}
           <section
             id="family"
@@ -1173,7 +1320,7 @@ export default function WeddingPage() {
               </p>
 
               <div className="mx-auto mt-8 max-w-sm">
-                <GuestCard compact />
+                <GuestCard guest={guest} compact />
               </div>
 
             </div>
