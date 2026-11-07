@@ -57,15 +57,6 @@ const events = [
     icon: "🌼",
   },
   {
-    date: "30",
-    month: "NOV",
-    day: "Monday",
-    title: "मंडप पूजन",
-    time: "सुबह 11:00 बजे",
-    description: "मंगलमय वैवाहिक जीवन के लिए पूजा एवं शुभ अनुष्ठान।",
-    icon: "🪔",
-  },
-  {
     date: "01",
     month: "DEC",
     day: "Tuesday",
@@ -95,10 +86,10 @@ const events = [
 ];
 
 const familyNames = [
-  "श्रीमती गीता वर्मा – श्री अनिल वर्मा",
+  "श्रीमति नीलम वर्मा- श्री अनिल वर्मा",
   "श्रीमती रेखा वर्मा – श्री अजय वर्मा",
-  "हरित वर्मा, करिश्मा वर्मा (ओम)",
-  "आर्यन वर्मा, नंदनी वर्मा, नव्या वर्मा",
+  "हर्षिल वर्मा, निखिल वर्मा (ओम)",
+  "आर्यन वर्मा, नंदिनी वर्मा , नव्या वर्मा",
   "एवं समस्त वर्मा परिवार व मित्रगण",
 ];
 
@@ -955,7 +946,7 @@ export default function WeddingPage() {
                   <div className="relative flex min-h-[390px] items-end justify-center overflow-hidden rounded-[22px] bg-gradient-to-br from-[#4b1728] via-[#6c293c] to-[#2c101b] sm:min-h-[520px]">
 
                     <img
-                      src="https://png.pngtree.com/png-vector/20250309/ourmid/pngtree-adorable-cartoon-wedding-couple-traditional-indian-marriage-attire-png-image_15745834.png"
+                      src="/couple.jpeg"
                       alt="Himanshu and Stuti"
                       className="absolute inset-0 h-full w-full object-cover"
                       onError={(event) => {
